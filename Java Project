@@ -1,0 +1,132 @@
+class Product {
+    int id;
+    String name;
+    double price;
+
+    Product(int id, String name, double price) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+    }
+}
+
+class BSTNode {
+    Product product;
+    BSTNode left;
+    BSTNode right;
+
+    BSTNode(Product product) {
+        this.product = product;
+        left = right = null;
+    }
+}
+
+class Inventory {
+    private BSTNode root;
+
+    public Inventory() {
+        root = null;
+    }
+
+    // Add a product to the BST
+    public void addProduct(int id, String name, double price) {
+        root = addProductRec(root, new Product(id, name, price));
+    }
+
+    private BSTNode addProductRec(BSTNode root, Product product) {
+        if (root == null) {
+            root = new BSTNode(product);
+            return root;
+        }
+
+        if (product.id < root.product.id) {
+            root.left = addProductRec(root.left, product);
+        } else if (product.id > root.product.id) {
+            root.right = addProductRec(root.right, product);
+        }
+
+        return root;
+    }
+
+    // Delete a product from the BST
+    public void deleteProduct(int id) {
+        root = deleteProductRec(root, id);
+    }
+
+    private BSTNode deleteProductRec(BSTNode root, int id) {
+        if (root == null) return root;
+
+        if (id < root.product.id) {
+            root.left = deleteProductRec(root.left, id);
+        } else if (id > root.product.id) {
+            root.right = deleteProductRec(root.right, id);
+        } else {
+            if (root.left == null) return root.right;
+            else if (root.right == null) return root.left;
+
+            root.product = minValue(root.right);
+            root.right = deleteProductRec(root.right, root.product.id);
+        }
+
+        return root;
+    }
+
+    private Product minValue(BSTNode root) {
+        Product minv = root.product;
+        while (root.left != null) {
+            minv = root.left.product;
+            root = root.left;
+        }
+        return minv;
+    }
+
+    // Search for a product by ID
+    public Product searchProduct(int id) {
+        return searchProductRec(root, id);
+    }
+
+    private Product searchProductRec(BSTNode root, int id) {
+        if (root == null || root.product.id == id) return root != null ? root.product : null;
+
+        if (root.product.id > id) return searchProductRec(root.left, id);
+
+        return searchProductRec(root.right, id);
+    }
+
+    // Display all products in order of IDs
+    public void displayProducts() {
+        displayProductsRec(root);
+    }
+
+    private void displayProductsRec(BSTNode root) {
+        if (root != null) {
+            displayProductsRec(root.left);
+            System.out.println("ID: " + root.product.id + ", Name: " + root.product.name + ", Price: " + root.product.price);
+            displayProductsRec(root.right);
+        }
+    }
+}
+
+public class OnlineStoreInventory {
+    public static void main(String[] args) {
+        Inventory inventory = new Inventory();
+        inventory.addProduct(1, "Laptop", 800.00);
+        inventory.addProduct(2, "Phone", 500.00);
+        inventory.addProduct(3, "Tablet", 300.00);
+
+        System.out.println("All products:");
+        inventory.displayProducts();
+
+        System.out.println("\nSearch for product with ID 2:");
+        Product product = inventory.searchProduct(2);
+        if (product != null) {
+            System.out.println("Found - ID: " + product.id + ", Name: " + product.name + ", Price: " + product.price);
+        } else {
+            System.out.println("Product not found");
+        }
+
+        System.out.println("\nDelete product with ID 2:");
+        inventory.deleteProduct(2);
+        inventory.displayProducts();
+    }
+}
